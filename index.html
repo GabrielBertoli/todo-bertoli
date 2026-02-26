@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Todo List — Bertoli</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 16px;
+    color: #fff;
+  }
+  .container {
+    width: 100%;
+    max-width: 480px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 24px;
+  }
+  h1 span { font-size: 32px; }
+  .input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .input-row input {
+    flex: 1;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: none;
+    font-size: 16px;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    outline: none;
+    backdrop-filter: blur(10px);
+  }
+  .input-row input::placeholder { color: rgba(255,255,255,0.4); }
+  .input-row button {
+    padding: 14px 20px;
+    border-radius: 12px;
+    border: none;
+    background: #7c3aed;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .input-row button:hover { background: #6d28d9; }
+  .filters {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .filters button {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filters button.active {
+    background: #7c3aed;
+    color: #fff;
+    border-color: #7c3aed;
+  }
+  .counter {
+    text-align: center;
+    font-size: 13px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 16px;
+  }
+  ul { list-style: none; }
+  li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.07);
+    backdrop-filter: blur(10px);
+    transition: all 0.2s;
+    animation: slideIn 0.3s ease;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  li:hover { background: rgba(255,255,255,0.12); }
+  li.done .text {
+    text-decoration: line-through;
+    opacity: 0.4;
+  }
+  .check {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  li.done .check {
+    background: #7c3aed;
+    border-color: #7c3aed;
+  }
+  li.done .check::after {
+    content: '✓';
+    font-size: 14px;
+    color: #fff;
+  }
+  .text {
+    flex: 1;
+    font-size: 16px;
+    transition: all 0.2s;
+  }
+  .delete {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.2);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: all 0.2s;
+  }
+  .delete:hover { color: #ef4444; background: rgba(239,68,68,0.1); }
+  .empty {
+    text-align: center;
+    color: rgba(255,255,255,0.3);
+    padding: 40px;
+    font-size: 15px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1><span>✅</span> Todo Bertoli</h1>
+  <div class="input-row">
+    <input type="text" id="input" placeholder="Ajouter une tâche..." autofocus>
+    <button id="addBtn">+</button>
+  </div>
+  <div class="filters">
+    <button class="active" data-f="all">Tout</button>
+    <button data-f="active">À faire</button>
+    <button data-f="done">Fait</button>
+  </div>
+  <div class="counter" id="counter"></div>
+  <ul id="list"></ul>
+</div>
+<script>
+  const $ = s => document.querySelector(s);
+  let todos = JSON.parse(localStorage.getItem('bertoli-todos') || '[]');
+  let filter = 'all';
+
+  function save() { localStorage.setItem('bertoli-todos', JSON.stringify(todos)); }
+
+  function render() {
+    const list = $('#list');
+    const filtered = todos.filter(t =>
+      filter === 'all' ? true : filter === 'done' ? t.done : !t.done
+    );
+    const active = todos.filter(t => !t.done).length;
+    $('#counter').textContent = `${active} tâche${active !== 1 ? 's' : ''} restante${active !== 1 ? 's' : ''}`;
+    if (!filtered.length) {
+      list.innerHTML = `<div class="empty">${filter === 'done' ? 'Rien de fait encore 👀' : filter === 'active' ? 'Tout est fait ! 🎉' : 'Ajoute ta première tâche ✍️'}</div>`;
+      return;
+    }
+    list.innerHTML = filtered.map((t, i) => {
+      const ri = todos.indexOf(t);
+      return `<li class="${t.done ? 'done' : ''}" data-i="${ri}">
+        <div class="check" onclick="toggle(${ri})"></div>
+        <span class="text">${esc(t.text)}</span>
+        <button class="delete" onclick="del(${ri})">✕</button>
+      </li>`;
+    }).join('');
+  }
+
+  function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+  function add() {
+    const v = $('#input').value.trim();
+    if (!v) return;
+    todos.unshift({ text: v, done: false });
+    $('#input').value = '';
+    save(); render();
+  }
+
+  function toggle(i) { todos[i].done = !todos[i].done; save(); render(); }
+  function del(i) { todos.splice(i, 1); save(); render(); }
+
+  $('#addBtn').onclick = add;
+  $('#input').onkeydown = e => { if (e.key === 'Enter') add(); };
+
+  document.querySelectorAll('.filters button').forEach(b => {
+    b.onclick = () => {
+      document.querySelectorAll('.filters button').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      filter = b.dataset.f;
+      render();
+    };
+  });
+
+  render();
+</script>
+</body>
+</html>
