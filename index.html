@@ -2,219 +2,457 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Todo List — Bertoli</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Todo Bertoli</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    padding: 40px 16px;
-    color: #fff;
+  :root {
+    --bg:#FAF9F7;--surface:#FFF;--text:#1D1D1F;--text-2:#6E6E73;--text-3:#AEAEB2;
+    --accent:#2D6A4F;--accent-bg:#EAF5EE;--red:#DE4C4A;--red-bg:#FDECEC;
+    --blue:#4A90D9;--blue-bg:#EBF3FC;--orange:#FF9500;--orange-bg:#FFF3E0;
+    --purple:#8B7EC8;--purple-bg:#EEEAFF;
+    --border:#EEEBE6;--divider:#EEEBE5;--hover:#F5F3EF;
   }
-  .container {
-    width: 100%;
-    max-width: 480px;
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;-webkit-font-smoothing:antialiased}
+  .app{max-width:560px;margin:0 auto;padding-bottom:80px}
+
+  /* Header */
+  .header{padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:50}
+  .h-left{display:flex;align-items:center;gap:10px}
+  .h-btn{width:34px;height:34px;border-radius:50%;background:var(--border);border:none;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;color:var(--text-2);transition:background .15s}
+  .h-btn:hover{background:var(--divider)}
+  .h-title{font-size:17px;font-weight:700;letter-spacing:-.2px}
+  .h-right{display:flex;gap:6px}
+  .h-btn.star{color:#FFB800;background:#FFF8E0}
+
+  /* Hero line */
+  .hero{padding:24px 20px 4px}
+  .hero-brand{font-size:14px;color:var(--text-2);font-weight:500;margin-bottom:8px}
+  .hero-line{height:3px;background:var(--red);border-radius:3px;width:0;animation:draw .8s .3s cubic-bezier(.4,0,.2,1) forwards;position:relative}
+  .hero-line::before{content:'✏️';position:absolute;right:-14px;top:-11px;font-size:13px}
+  @keyframes draw{to{width:120px}}
+
+  /* Filters */
+  .filters{display:flex;gap:6px;padding:14px 20px 0;overflow-x:auto;scrollbar-width:none}
+  .filters::-webkit-scrollbar{display:none}
+  .chip{padding:7px 13px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);font-family:inherit;font-size:12px;font-weight:600;color:var(--text-2);cursor:pointer;white-space:nowrap;transition:all .15s}
+  .chip:hover{border-color:var(--text-3)}
+  .chip.on{background:var(--text);color:#fff;border-color:var(--text)}
+
+  /* Section */
+  .sec{padding:20px 20px 0}
+  .sec-head{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+  .sec-icon{font-size:15px}
+  .sec-title{font-size:14px;font-weight:800;letter-spacing:-.2px}
+  .sec-desc{font-size:12px;color:var(--text-2);margin-bottom:14px}
+
+  /* Task list */
+  .tl{display:flex;flex-direction:column}
+
+  .tr{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--divider);transition:background .1s;cursor:pointer;animation:ri .25s ease both}
+  .tr:hover{background:var(--hover)}
+  @keyframes ri{from{opacity:0;transform:translateY(3px)}to{opacity:1}}
+
+  .ck{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;cursor:pointer}
+  .ck:hover{border-color:var(--accent);background:var(--accent-bg)}
+  .ck.p1{border-color:var(--red)}.ck.p1:hover{background:var(--red-bg)}
+  .ck.p2{border-color:var(--orange)}.ck.p2:hover{background:var(--orange-bg)}
+  .ck.p3{border-color:var(--blue)}.ck.p3:hover{background:var(--blue-bg)}
+  .tr.done .ck{background:var(--text-3);border-color:var(--text-3)}
+  .tr.done .ck::after{content:'✓';font-size:10px;color:#fff;font-weight:800}
+
+  .tc{flex:1;min-width:0}
+  .tt{font-size:14px;font-weight:500;line-height:1.4;word-break:break-word;transition:all .2s}
+  .tr.done .tt{text-decoration:line-through;color:var(--text-3)}
+  .tm{display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap}
+  .tm-tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;display:flex;align-items:center;gap:3px}
+  .tm-date{background:var(--accent-bg);color:var(--accent)}
+  .tm-pri{background:var(--red-bg);color:var(--red)}
+  .tm-pri.p2{background:var(--orange-bg);color:var(--orange)}
+  .tm-pri.p3{background:var(--blue-bg);color:var(--blue)}
+  .tm-sub{background:var(--border);color:var(--text-2)}
+  .tm-time{background:var(--purple-bg);color:var(--purple)}
+
+  .t-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .t-del{background:none;border:none;color:var(--text-3);cursor:pointer;padding:4px;font-size:12px;opacity:0;transition:all .15s;border-radius:6px}
+  .tr:hover .t-del{opacity:.6}
+  .t-del:hover{opacity:1!important;color:var(--red);background:var(--red-bg)}
+  .t-handle{color:var(--text-3);font-size:13px;opacity:.3;user-select:none;letter-spacing:1px}
+  .tr:hover .t-handle{opacity:.7}
+
+  /* Add row */
+  .ar{display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;transition:background .1s}
+  .ar:hover{background:var(--hover)}
+  .ar-icon{width:20px;height:20px;border-radius:50%;border:2px dashed var(--text-3);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-3);font-weight:700;flex-shrink:0;transition:all .15s}
+  .ar:hover .ar-icon{border-color:var(--accent);color:var(--accent)}
+  .ar-label{font-size:13px;color:var(--text-3);font-weight:500}
+  .ar:hover .ar-label{color:var(--text-2)}
+
+  /* Inline input */
+  .ii{display:none;align-items:center;gap:12px;padding:8px 20px;border-bottom:1px solid var(--divider);background:var(--surface)}
+  .ii.show{display:flex}
+  .ii input{flex:1;border:none;outline:none;font-family:inherit;font-size:14px;font-weight:500;color:var(--text);background:transparent;padding:5px 0}
+  .ii input::placeholder{color:var(--text-3)}
+
+  /* ====== DETAIL SHEET ====== */
+  .sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:200;display:none;backdrop-filter:blur(2px)}
+  .sheet-overlay.show{display:block;animation:oIn .2s ease}
+  @keyframes oIn{from{opacity:0}to{opacity:1}}
+
+  .sheet{
+    position:fixed;bottom:0;left:0;right:0;
+    background:var(--surface);border-radius:16px 16px 0 0;
+    z-index:201;transform:translateY(100%);
+    transition:transform .3s cubic-bezier(.4,0,.2,1);
+    max-height:85dvh;overflow-y:auto;
+    padding-bottom:max(20px,env(safe-area-inset-bottom));
   }
-  h1 {
-    text-align: center;
-    font-size: 28px;
-    margin-bottom: 24px;
-  }
-  h1 span { font-size: 32px; }
-  .input-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 24px;
-  }
-  .input-row input {
-    flex: 1;
-    padding: 14px 16px;
-    border-radius: 12px;
-    border: none;
-    font-size: 16px;
-    background: rgba(255,255,255,0.1);
-    color: #fff;
-    outline: none;
-    backdrop-filter: blur(10px);
-  }
-  .input-row input::placeholder { color: rgba(255,255,255,0.4); }
-  .input-row button {
-    padding: 14px 20px;
-    border-radius: 12px;
-    border: none;
-    background: #7c3aed;
-    color: #fff;
-    font-size: 20px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  .input-row button:hover { background: #6d28d9; }
-  .filters {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 20px;
-  }
-  .filters button {
-    padding: 8px 16px;
-    border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.2);
-    background: transparent;
-    color: rgba(255,255,255,0.6);
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .filters button.active {
-    background: #7c3aed;
-    color: #fff;
-    border-color: #7c3aed;
-  }
-  .counter {
-    text-align: center;
-    font-size: 13px;
-    color: rgba(255,255,255,0.4);
-    margin-bottom: 16px;
-  }
-  ul { list-style: none; }
-  li {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 16px;
-    margin-bottom: 8px;
-    border-radius: 12px;
-    background: rgba(255,255,255,0.07);
-    backdrop-filter: blur(10px);
-    transition: all 0.2s;
-    animation: slideIn 0.3s ease;
-  }
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  li:hover { background: rgba(255,255,255,0.12); }
-  li.done .text {
-    text-decoration: line-through;
-    opacity: 0.4;
-  }
-  .check {
-    width: 24px; height: 24px;
-    border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.3);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: all 0.2s;
-  }
-  li.done .check {
-    background: #7c3aed;
-    border-color: #7c3aed;
-  }
-  li.done .check::after {
-    content: '✓';
-    font-size: 14px;
-    color: #fff;
-  }
-  .text {
-    flex: 1;
-    font-size: 16px;
-    transition: all 0.2s;
-  }
-  .delete {
-    background: none;
-    border: none;
-    color: rgba(255,255,255,0.2);
-    font-size: 18px;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 8px;
-    transition: all 0.2s;
-  }
-  .delete:hover { color: #ef4444; background: rgba(239,68,68,0.1); }
-  .empty {
-    text-align: center;
-    color: rgba(255,255,255,0.3);
-    padding: 40px;
-    font-size: 15px;
-  }
+  .sheet.show{transform:translateY(0)}
+
+  .sheet-grab{width:36px;height:4px;background:var(--border);border-radius:4px;margin:10px auto 0}
+
+  .sheet-head{padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between}
+  .sh-left{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--text-2);cursor:pointer}
+  .sh-left:hover{color:var(--accent)}
+  .sh-right .h-btn{background:transparent}
+
+  .sheet-task{padding:16px 20px 0;display:flex;align-items:flex-start;gap:14px}
+  .sheet-task .ck{margin-top:2px}
+  .sheet-task-text{font-size:17px;font-weight:700;line-height:1.35;flex:1}
+  .sheet-task-text[contenteditable]{outline:none}
+
+  .sheet-fields{padding:12px 20px 0}
+  .sf-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--divider)}
+  .sf-icon{font-size:16px;width:24px;text-align:center;flex-shrink:0}
+  .sf-label{font-size:14px;font-weight:500;color:var(--text);flex:1}
+  .sf-value{font-size:13px;font-weight:500;color:var(--text-2);cursor:pointer}
+  .sf-value:hover{color:var(--text)}
+  .sf-value select{font-family:inherit;font-size:13px;border:none;background:transparent;color:inherit;font-weight:500;outline:none;cursor:pointer;appearance:none;padding-right:4px}
+
+  /* Chips row */
+  .sheet-chips{display:flex;gap:6px;padding:14px 20px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--divider)}
+  .sheet-chips::-webkit-scrollbar{display:none}
+  .sc-btn{padding:8px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);font-family:inherit;font-size:12px;font-weight:600;color:var(--text-2);cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px;transition:all .15s}
+  .sc-btn:hover{border-color:var(--text-3)}
+
+  /* Sub-tasks */
+  .sheet-subs{padding:16px 20px 0}
+  .ss-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .ss-title{font-size:14px;font-weight:800}
+  .ss-count{font-size:12px;color:var(--text-3);font-weight:500}
+  .ss-toggle{font-size:12px;color:var(--text-3);cursor:pointer;transition:transform .2s}
+
+  .sub-row{display:flex;align-items:center;gap:12px;padding:10px 0}
+  .sub-ck{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
+  .sub-ck:hover{border-color:var(--accent);background:var(--accent-bg)}
+  .sub-row.done .sub-ck{background:var(--text-3);border-color:var(--text-3)}
+  .sub-row.done .sub-ck::after{content:'✓';font-size:9px;color:#fff;font-weight:800}
+  .sub-text{font-size:14px;font-weight:500;flex:1}
+  .sub-row.done .sub-text{text-decoration:line-through;color:var(--text-3)}
+  .sub-del{background:none;border:none;font-size:11px;color:var(--text-3);cursor:pointer;opacity:0;transition:opacity .15s;padding:4px}
+  .sub-row:hover .sub-del{opacity:.6}
+  .sub-del:hover{color:var(--red)}
+
+  .add-sub{display:flex;align-items:center;gap:12px;padding:10px 0;cursor:pointer}
+  .add-sub span{font-size:14px;font-weight:600;color:var(--accent)}
+  .add-sub:hover span{text-decoration:underline}
+  .sub-input{display:none;align-items:center;gap:12px;padding:6px 0}
+  .sub-input.show{display:flex}
+  .sub-input input{flex:1;border:none;outline:none;font-family:inherit;font-size:14px;font-weight:500;color:var(--text);background:transparent}
+  .sub-input input::placeholder{color:var(--text-3)}
+
+  /* Comment */
+  .sheet-comment{padding:0 20px;margin-top:auto;position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--divider);display:flex;align-items:center;gap:10px;padding-top:12px;padding-bottom:12px}
+  .sheet-comment input{flex:1;border:none;outline:none;font-family:inherit;font-size:14px;color:var(--text);background:transparent}
+  .sheet-comment input::placeholder{color:var(--text-3)}
+  .sheet-comment button{background:none;border:none;font-size:18px;color:var(--text-3);cursor:pointer;padding:4px}
+  .sheet-comment button:hover{color:var(--text)}
+
+  /* Toolbar */
+  .toolbar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--divider);padding:10px 20px;padding-bottom:max(10px,env(safe-area-inset-bottom));z-index:100;display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:none}
+  .toolbar::-webkit-scrollbar{display:none}
+  .tb{padding:8px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);font-family:inherit;font-size:12px;font-weight:600;color:var(--text-2);cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px;transition:all .15s}
+  .tb:hover{border-color:var(--text-3);background:var(--hover)}
+  .tb.on{background:var(--text);color:#fff;border-color:var(--text)}
+  .tb-sep{width:1px;height:24px;background:var(--divider);flex-shrink:0;margin:0 2px}
+
+  .empty{text-align:center;padding:50px 30px}
+  .empty .ei{font-size:36px;margin-bottom:10px}
+  .empty .et{font-size:15px;font-weight:700;margin-bottom:3px}
+  .empty .es{font-size:12px;color:var(--text-2)}
+
+  @media(max-width:480px){.t-del{opacity:.3}.sub-del{opacity:.3}}
+  @media(prefers-color-scheme:dark){:root{--bg:#121212;--surface:#1C1C1E;--text:#F5F5F7;--text-2:#8E8E93;--text-3:#48484A;--border:#2C2C2E;--divider:#2C2C2E;--hover:#252528;--accent:#52B788;--accent-bg:#1a3328;--red-bg:#2a1616;--blue-bg:#162030;--orange-bg:#2e2416;--purple-bg:#1e1a2e}}
 </style>
 </head>
 <body>
-<div class="container">
-  <h1><span>✅</span> Todo Bertoli</h1>
-  <div class="input-row">
-    <input type="text" id="input" placeholder="Ajouter une tâche..." autofocus>
-    <button id="addBtn">+</button>
+
+<div class="app">
+  <div class="header">
+    <div class="h-left"><button class="h-btn">‹</button><span class="h-title">Todo Bertoli</span></div>
+    <div class="h-right"><button class="h-btn star">★</button><button class="h-btn">⋮</button></div>
   </div>
-  <div class="filters">
-    <button class="active" data-f="all">Tout</button>
-    <button data-f="active">À faire</button>
-    <button data-f="done">Fait</button>
+  <div class="hero"><div class="hero-brand">Bertoli.</div><div class="hero-line"></div></div>
+  <div class="filters" id="filters">
+    <button class="chip on" data-f="all">Tout</button>
+    <button class="chip" data-f="active">À faire</button>
+    <button class="chip" data-f="done">Terminées</button>
+    <button class="chip" data-f="p1">🔴 P1</button>
+    <button class="chip" data-f="p2">🟠 P2</button>
+    <button class="chip" data-f="p3">🔵 P3</button>
   </div>
-  <div class="counter" id="counter"></div>
-  <ul id="list"></ul>
+  <div class="sec">
+    <div class="sec-head"><span class="sec-icon">✅</span><span class="sec-title">Mes tâches</span></div>
+    <div class="sec-desc" id="desc"></div>
+  </div>
+  <div class="tl" id="tl"></div>
+  <div class="ii" id="ii"><div class="ck"></div><input id="ni" placeholder="Nouvelle tâche..." autocomplete="off"></div>
+  <div class="ar" id="ar"><div class="ar-icon">+</div><span class="ar-label">New task</span></div>
 </div>
+
+<!-- Detail sheet -->
+<div class="sheet-overlay" id="so"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-grab"></div>
+  <div class="sheet-head">
+    <div class="sh-left" id="shList">📥 Inbox ›</div>
+    <div class="sh-right"><button class="h-btn" id="shClose">⋮</button></div>
+  </div>
+  <div class="sheet-task">
+    <div class="ck" id="shCk"></div>
+    <div class="sheet-task-text" contenteditable="true" id="shTitle"></div>
+  </div>
+  <div class="sheet-fields">
+    <div class="sf-row"><span class="sf-icon">📅</span><span class="sf-label" id="shDate">Today</span></div>
+    <div class="sf-row"><span class="sf-icon">🚩</span><span class="sf-label">Priority</span><span class="sf-value"><select id="shPri"><option value="1">Priority 1</option><option value="2">Priority 2</option><option value="3">Priority 3</option><option value="4" selected>Priority 4</option></select></span></div>
+    <div class="sf-row"><span class="sf-icon">⏰</span><span class="sf-label" id="shTime">Set time</span><input type="time" id="shTimeInput" style="border:none;background:transparent;font-family:inherit;font-size:13px;color:var(--text-2);outline:none;width:80px"></div>
+  </div>
+  <div class="sheet-chips">
+    <button class="sc-btn">🏷 Labels</button>
+    <button class="sc-btn">📍 Location</button>
+    <button class="sc-btn">📝 Description</button>
+    <button class="sc-btn">📂 Move to...</button>
+  </div>
+  <div class="sheet-subs" id="shSubs">
+    <div class="ss-head">
+      <span class="ss-title">Sub-tasks <span class="ss-count" id="ssCount">0/0</span></span>
+      <span class="ss-toggle" id="ssToggle">▲</span>
+    </div>
+    <div id="ssList"></div>
+    <div class="add-sub" id="addSub"><span>+ Add sub-task</span></div>
+    <div class="sub-input" id="subInput"><input id="subNi" placeholder="Sub-task..." autocomplete="off"></div>
+  </div>
+  <div class="sheet-comment">
+    <input placeholder="Add a comment" id="commentInput" autocomplete="off">
+    <button>📎</button>
+  </div>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar" id="toolbar">
+  <button class="tb" id="tbAdd"><span>＋</span> New task</button>
+  <div class="tb-sep"></div>
+  <button class="tb" id="tbSort">↕️ Sort</button>
+  <button class="tb" id="tbClear">🗑 Purge</button>
+</div>
+
 <script>
-  const $ = s => document.querySelector(s);
-  let todos = JSON.parse(localStorage.getItem('bertoli-todos') || '[]');
-  let filter = 'all';
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+let todos=JSON.parse(localStorage.getItem('bertoli-v5')||'[]');
+let filter='all', openIdx=null;
 
-  function save() { localStorage.setItem('bertoli-todos', JSON.stringify(todos)); }
+function save(){localStorage.setItem('bertoli-v5',JSON.stringify(todos))}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 
-  function render() {
-    const list = $('#list');
-    const filtered = todos.filter(t =>
-      filter === 'all' ? true : filter === 'done' ? t.done : !t.done
-    );
-    const active = todos.filter(t => !t.done).length;
-    $('#counter').textContent = `${active} tâche${active !== 1 ? 's' : ''} restante${active !== 1 ? 's' : ''}`;
-    if (!filtered.length) {
-      list.innerHTML = `<div class="empty">${filter === 'done' ? 'Rien de fait encore 👀' : filter === 'active' ? 'Tout est fait ! 🎉' : 'Ajoute ta première tâche ✍️'}</div>`;
-      return;
-    }
-    list.innerHTML = filtered.map((t, i) => {
-      const ri = todos.indexOf(t);
-      return `<li class="${t.done ? 'done' : ''}" data-i="${ri}">
-        <div class="check" onclick="toggle(${ri})"></div>
-        <span class="text">${esc(t.text)}</span>
-        <button class="delete" onclick="del(${ri})">✕</button>
-      </li>`;
-    }).join('');
+function ensureFields(t){
+  if(!t.subs)t.subs=[];
+  if(!t.priority)t.priority=4;
+  if(!t.time)t.time='';
+  if(!t.comments)t.comments=[];
+  return t;
+}
+
+const pBorder={1:'p1',2:'p2',3:'p3',4:''};
+const pLabel={1:'P1',2:'P2',3:'P3'};
+
+function getFiltered(){
+  return todos.filter(t=>{
+    if(filter==='active')return !t.done;
+    if(filter==='done')return t.done;
+    if(filter==='p1')return t.priority===1&&!t.done;
+    if(filter==='p2')return t.priority===2&&!t.done;
+    if(filter==='p3')return t.priority===3&&!t.done;
+    return true;
+  });
+}
+
+function render(){
+  const list=getFiltered();
+  const act=todos.filter(t=>!t.done).length, dn=todos.filter(t=>t.done).length;
+  $('#desc').textContent=`${act} à faire · ${dn} terminée${dn!==1?'s':''}`;
+
+  if(!list.length){
+    $('#tl').innerHTML=`<div class="empty"><div class="ei">✨</div><div class="et">${todos.length?'Rien ici':'Bienvenue !'}</div><div class="es">Ajoutez votre première tâche</div></div>`;
+    return;
   }
 
-  function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-
-  function add() {
-    const v = $('#input').value.trim();
-    if (!v) return;
-    todos.unshift({ text: v, done: false });
-    $('#input').value = '';
-    save(); render();
-  }
-
-  function toggle(i) { todos[i].done = !todos[i].done; save(); render(); }
-  function del(i) { todos.splice(i, 1); save(); render(); }
-
-  $('#addBtn').onclick = add;
-  $('#input').onkeydown = e => { if (e.key === 'Enter') add(); };
-
-  document.querySelectorAll('.filters button').forEach(b => {
-    b.onclick = () => {
-      document.querySelectorAll('.filters button').forEach(x => x.classList.remove('active'));
-      b.classList.add('active');
-      filter = b.dataset.f;
-      render();
-    };
+  const pOrd={1:0,2:1,3:2,4:3,undefined:3};
+  const sorted=[...list].sort((a,b)=>{
+    if(a.done!==b.done)return a.done?1:-1;
+    return (pOrd[a.priority]||3)-(pOrd[b.priority]||3);
   });
 
-  render();
+  $('#tl').innerHTML=sorted.map((t,vi)=>{
+    ensureFields(t);
+    const i=todos.indexOf(t);
+    const ckClass=pBorder[t.priority]||'';
+    const subDone=t.subs.filter(s=>s.done).length;
+    const subTotal=t.subs.length;
+    let tags='';
+    if(t.priority&&t.priority<4)tags+=`<span class="tm-tag tm-pri ${t.priority===2?'p2':t.priority===3?'p3':''}">🚩 ${pLabel[t.priority]}</span>`;
+    if(subTotal)tags+=`<span class="tm-tag tm-sub">☑ ${subDone}/${subTotal}</span>`;
+    if(t.time)tags+=`<span class="tm-tag tm-time">⏰ ${t.time}</span>`;
+    return `<div class="tr ${t.done?'done':''}" data-i="${i}" style="animation-delay:${vi*.03}s">
+      <div class="ck ${ckClass}" onclick="event.stopPropagation();toggle(${i})"></div>
+      <div class="tc" onclick="openSheet(${i})">
+        <div class="tt">${esc(t.text)}</div>
+        ${tags?`<div class="tm">${tags}</div>`:''}
+      </div>
+      <div class="t-right">
+        <button class="t-del" onclick="event.stopPropagation();del(${i})">✕</button>
+        <span class="t-handle">≡</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggle(i){todos[i].done=!todos[i].done;save();render();if(openIdx===i)renderSheet()}
+function del(i){todos.splice(i,1);save();render();if(openIdx===i)closeSheet()}
+
+function addTask(text){
+  if(!text.trim())return;
+  todos.push(ensureFields({text:text.trim(),done:false,priority:4,subs:[],time:'',comments:[],ts:Date.now()}));
+  save();render();
+}
+
+// Inline input
+$('#ar').onclick=()=>{$('#ii').classList.add('show');$('#ar').style.display='none';$('#ni').focus()};
+$('#ni').onkeydown=e=>{if(e.key==='Enter'){addTask($('#ni').value);$('#ni').value=''}if(e.key==='Escape')closeInline()};
+$('#ni').onblur=()=>setTimeout(()=>{if($('#ni').value.trim()){addTask($('#ni').value);$('#ni').value=''}closeInline()},150);
+function closeInline(){$('#ii').classList.remove('show');$('#ar').style.display=''}
+
+// Toolbar
+$('#tbAdd').onclick=()=>{$('#ii').classList.add('show');$('#ar').style.display='none';$('#ni').focus()};
+$('#tbClear').onclick=()=>{todos=todos.filter(t=>!t.done);save();render()};
+$('#tbSort').onclick=()=>{todos.sort((a,b)=>(a.priority||4)-(b.priority||4));save();render()};
+
+// Filters
+$$('.chip').forEach(c=>{c.onclick=()=>{$$('.chip').forEach(x=>x.classList.remove('on'));c.classList.add('on');filter=c.dataset.f;render()}});
+
+// ====== DETAIL SHEET ======
+function openSheet(i){
+  openIdx=i;
+  const t=ensureFields(todos[i]);
+  $('#shTitle').textContent=t.text;
+  $('#shCk').className='ck '+(pBorder[t.priority]||'');
+  if(t.done)$('#shCk').classList.add('done-ck');
+  $('#shPri').value=t.priority||4;
+  $('#shTimeInput').value=t.time||'';
+  const today=new Date();
+  $('#shDate').textContent='Today — '+today.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  renderSheet();
+  $('#so').classList.add('show');
+  setTimeout(()=>$('#sheet').classList.add('show'),10);
+  $('#toolbar').style.display='none';
+}
+
+function closeSheet(){
+  // Save title if changed
+  if(openIdx!==null&&todos[openIdx]){
+    const newText=$('#shTitle').textContent.trim();
+    if(newText)todos[openIdx].text=newText;
+    save();render();
+  }
+  $('#sheet').classList.remove('show');
+  setTimeout(()=>{$('#so').classList.remove('show');$('#toolbar').style.display=''},300);
+  openIdx=null;
+}
+
+$('#so').onclick=closeSheet;
+$('#shClose').onclick=closeSheet;
+
+$('#shCk').onclick=()=>{if(openIdx!==null){toggle(openIdx)}};
+
+$('#shPri').onchange=()=>{
+  if(openIdx!==null){
+    todos[openIdx].priority=parseInt($('#shPri').value);
+    save();render();renderSheet();
+  }
+};
+
+$('#shTimeInput').onchange=()=>{
+  if(openIdx!==null){
+    todos[openIdx].time=$('#shTimeInput').value;
+    save();render();
+  }
+};
+
+function renderSheet(){
+  if(openIdx===null)return;
+  const t=ensureFields(todos[openIdx]);
+  const subDone=t.subs.filter(s=>s.done).length;
+  $('#ssCount').textContent=`${subDone}/${t.subs.length}`;
+  $('#ssList').innerHTML=t.subs.map((s,si)=>`
+    <div class="sub-row ${s.done?'done':''}">
+      <div class="sub-ck" onclick="toggleSub(${si})"></div>
+      <span class="sub-text">${esc(s.text)}</span>
+      <button class="sub-del" onclick="delSub(${si})">✕</button>
+    </div>
+  `).join('');
+}
+
+function toggleSub(si){if(openIdx===null)return;todos[openIdx].subs[si].done=!todos[openIdx].subs[si].done;save();render();renderSheet()}
+function delSub(si){if(openIdx===null)return;todos[openIdx].subs.splice(si,1);save();render();renderSheet()}
+
+$('#addSub').onclick=()=>{$('#subInput').classList.add('show');$('#subNi').focus()};
+$('#subNi').onkeydown=e=>{
+  if(e.key==='Enter'&&$('#subNi').value.trim()){
+    todos[openIdx].subs.push({text:$('#subNi').value.trim(),done:false});
+    $('#subNi').value='';save();render();renderSheet();
+  }
+  if(e.key==='Escape'){$('#subInput').classList.remove('show')}
+};
+$('#subNi').onblur=()=>setTimeout(()=>{
+  if($('#subNi').value.trim()&&openIdx!==null){
+    todos[openIdx].subs.push({text:$('#subNi').value.trim(),done:false});
+    $('#subNi').value='';save();render();renderSheet();
+  }
+  $('#subInput').classList.remove('show');
+},150);
+
+$('#commentInput').onkeydown=e=>{
+  if(e.key==='Enter'&&$('#commentInput').value.trim()&&openIdx!==null){
+    todos[openIdx].comments.push({text:$('#commentInput').value.trim(),ts:Date.now()});
+    $('#commentInput').value='';save();
+  }
+};
+
+// Prevent sheet close on sheet click
+$('#sheet').onclick=e=>e.stopPropagation();
+
+// Migrate
+(function(){
+  if(todos.length)return;
+  for(const k of['bertoli-v4','bertoli-v3','bertoli-todos-v2']){
+    const old=JSON.parse(localStorage.getItem(k)||'[]');
+    if(old.length){todos=old.map(t=>ensureFields({text:t.text,done:t.done,priority:4,subs:[],time:'',comments:[],ts:t.ts||Date.now()}));save();break}
+  }
+})();
+
+todos.forEach(ensureFields);
+render();
 </script>
 </body>
 </html>
